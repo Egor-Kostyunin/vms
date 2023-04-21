@@ -1,8 +1,9 @@
 #include "loader.h"
 #include <string.h>
+#include <stdlib.h>
 
 #ifdef __linux__
-	#incude <dlfcn.h>
+	#include <dlfcn.h>
 	#define POSTFIX_SIZE 3
 	#define POSTFIX ".so"
 #endif
@@ -58,8 +59,8 @@ void unload_plugin(char *plugin_name){
 	g_plugins[plugin_id] = g_plugins[g_count - 1];
 	g_count--;
 	
-	for(unsigned short int i = 0;i < deleted_plugin.count;i++){
-		free(deleted_plugin->function.info.name);
+	for(unsigned short int i = 0;i < deleted_plugin->count;i++){
+		free(deleted_plugin->functions[i].info.name);
 	}
 	
 	#ifdef __linux__

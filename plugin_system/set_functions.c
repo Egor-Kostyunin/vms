@@ -11,7 +11,7 @@ void set_current_plugin(char *plugin_name){
 }
 
 void set_arg_tuple(pfarg *arg_tuple){
-	g_arg_tuple = arg_typle;
+	g_arg_tuple = arg_tuple;
 }
 
 void set_result_arg(pfarg *result){
