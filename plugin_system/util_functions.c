@@ -7,6 +7,8 @@ unsigned short int get_plugin_id(char *plugin_name){
 			return i;
 		}
 	}
+	
+	return 0;
 }
 
 void set_arg_tuple(pfarg *arg_tuple){
