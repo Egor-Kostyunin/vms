@@ -1,7 +1,7 @@
 #include "loader.h"
 #include <string.h>
 
-BOOL execute_by_name(unsigned short int plugin_id,char *function_name){
+BOOL execute_by_name(unsigned short int plugin_id,char *function_name,pfarg *result,pfarg *arg_tuple){
 	unsigned short int function_id = 0;
 	
 	for(unsigned short int i = 0;i < MAX_FUNCTION_COUNT;i++){
@@ -20,27 +20,27 @@ BOOL execute_by_name(unsigned short int plugin_id,char *function_name){
 	}
 	
 	if(g_plugins[plugin_id]->functions[function_id].info.type == TYPE_IN){
-		if(g_arg_tuple == NULL){
+		if(arg_tuple == NULL){
 			return FALSE;
 		}
 		
-		g_plugins[plugin_id]->functions[function_id].addrres(NULL,g_arg_tuple);
+		g_plugins[plugin_id]->functions[function_id].addrres(NULL,arg_tuple);
 	}
 	
 	if(g_plugins[plugin_id]->functions[function_id].info.type == TYPE_OUT){
-		if(g_result == NULL){
+		if(result == NULL){
 			return FALSE;
 		}
 		
-		g_plugins[plugin_id]->functions[function_id].addrres(g_result,NULL);
+		g_plugins[plugin_id]->functions[function_id].addrres(result,NULL);
 	}
 	
 	if(g_plugins[plugin_id]->functions[function_id].info.type == TYPE_INOUT){
-		if(g_result == NULL && g_arg_tuple == NULL){
+		if(result == NULL && arg_tuple == NULL){
 			return FALSE;
 		}
 		
-		g_plugins[plugin_id]->functions[function_id].addrres(g_result,g_arg_tuple);
+		g_plugins[plugin_id]->functions[function_id].addrres(result,arg_tuple);
 	}
 	return TRUE;
 }

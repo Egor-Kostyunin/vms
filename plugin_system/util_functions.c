@@ -10,11 +10,3 @@ unsigned short int get_plugin_id(char *plugin_name){
 	
 	return 0;
 }
-
-void set_arg_tuple(pfarg *arg_tuple){
-	g_arg_tuple = arg_tuple;
-}
-
-void set_result_arg(pfarg *result){
-	g_result = result;
-}
