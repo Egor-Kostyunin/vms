@@ -13,8 +13,8 @@ BOOL load_plugin(char *plugin_name){
 	g_plugins[g_count] = (plugin*)calloc(1,sizeof(plugin));
 	
 	char *dllname = (char*)calloc(strlen(plugin_name)+POSTFIX_SIZE+1,sizeof(char));
-	dllname = strcpy(dllname,POSTFIX);
-	
+	dllname = strcpy(dllname,plugin_name);
+	dllname = strcat(dllname,POSTFIX);
 	#ifdef __linux__
 		dlllib lib = dlopen(dllname,RTLD_LAZY);
 		export_function plugin_export = (export_function)dlsym(lib,"plugin_export");
