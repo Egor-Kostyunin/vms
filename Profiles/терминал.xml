@@ -1,0 +1,14 @@
+<prof appname='none' version='1' std='1'>
+	<req>
+		<plugin name='terminal'/>
+	</req>
+	<onopenacton function='start_cmd_server'/>
+	<cmd>
+		<command name='покажи файлы' function='post_cmd'>
+			<arg type='str' value='ls'/>
+		</command>
+		<command name='покажи все файлы' function='post_cmd'>
+			<arg type='str' value='ls -a'/>
+		</command>
+	</cmd>
+</prof>
