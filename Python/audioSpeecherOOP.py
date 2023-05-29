@@ -57,9 +57,9 @@ class AuidoSpeecher():
                 
             if args.model is None:
                 #model = Model(lang="ru")
-                model = Model('E:/project/vosk-model-small-ru-0.4')
+                model = Model('./vosk-model-small-ru-0.4')
             else:
-                model = Model('../vosk-model-small-ru-0.4')
+                model = Model('./vosk-model-small-ru-0.4')
 
             if args.filename:
                 dump_fn = open(args.filename, "wb")
