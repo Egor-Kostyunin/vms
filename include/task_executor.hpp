@@ -32,7 +32,7 @@ namespace task_executor{
 	
 	void update_tasks_state();
 	
-	 task** get_complite(unsigned int *count);
+	task** get_complite(unsigned int *count);
 	
 	void delete_task(task *task_ptr);
 };

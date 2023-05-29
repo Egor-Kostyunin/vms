@@ -71,5 +71,7 @@ namespace task_executor{
 		return task_ptr;
 	}
 	
-	void delete_task(task *task_ptr);
+	void delete_task(task *task_ptr){
+		std::free(task_ptr);
+	}
 };

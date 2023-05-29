@@ -129,5 +129,9 @@ namespace plugin_api{
 	  * @param plugin_name - имя плагина
 	  */
 	void unload(char *plugin_name);
+	
+	pfarg* alloc_ret(unsigned short int count);
+	
+	pfarg* create_arg_tuple(unsigned short int count,...);
 };
 #endif

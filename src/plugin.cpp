@@ -2,6 +2,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <iostream>
+#include <cstdarg>
 
 #ifdef __linux__
 	#include <dlfcn.h>
@@ -30,8 +31,8 @@ namespace plugin_api{
 		g_plugins[g_count] = (plugin*)std::calloc(1,sizeof(plugin));
 		
 		//Формирукм имя динамической библиотеки
-		char *dllname = (char*)std::calloc(std::strlen(pluginPath)+std::strlen(plugin_name)+POSTFIX_SIZE+1,sizeof(char));
-		dllname = std::strcpy(dllname,pluginPath);
+		char *dllname = (char*)std::calloc(std::strlen(pluginsPath)+std::strlen(plugin_name)+POSTFIX_SIZE+1,sizeof(char));
+		dllname = std::strcpy(dllname,pluginsPath);
 		dllname = std::strcat(dllname,plugin_name);
 		dllname = std::strcat(dllname,POSTFIX);
 		
@@ -177,5 +178,20 @@ namespace plugin_api{
 		#endif
 		
 		free(deleted_plugin);
+	}
+	
+	pfarg* alloc_ret(unsigned short int count){
+		return reinterpret_cast<pfarg*>(std::calloc(count,sizeof(pfarg)));
+	}
+	
+	pfarg* create_arg_tuple(unsigned short int count,...){
+		pfarg *arg_ptr = reinterpret_cast<pfarg*>(std::calloc(count,sizeof(pfarg)));
+		va_list arg_list;
+		va_start(arg_list,count);
+		for(unsigned short int i = 0;i < count;i++){
+			arg_ptr[i] = va_arg(arg_list,plugin_api::pfarg);
+		}
+		va_end(arg_list);
+		return arg_ptr;
 	}
 };
