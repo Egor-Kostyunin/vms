@@ -6,11 +6,12 @@ namespace task_executor{
 	std::list<task*> tasks;
 	std::list<task*> complite_tasks;
 	
-	void exec_theard(void *task_ptr){
+	void* exec_thread(void *task_ptr){
 		reinterpret_cast<task*>(task_ptr)->pluginError = plugin_api::exec(reinterpret_cast<task*>(task_ptr)->pluginName,
 																		  reinterpret_cast<task*>(task_ptr)->functionName,
 																		  reinterpret_cast<task*>(task_ptr)->ret,
 																		  reinterpret_cast<task*>(task_ptr)->arg);
+																		          return nullptr;
 	}
 	
 	task* new_task(char* plugin_name,char *function_name,plugin_api::pfarg *ret,plugin_api::pfarg *arg){
@@ -30,7 +31,7 @@ namespace task_executor{
 		for(auto it = tasks.begin();it != tasks.end();++it){
 			if((*it)->taskState == TaskState::NotStart){
 				(*it)->taskState = TaskState::InProgress;
-				ptheard_create(&(*it)->theard,nullptr,exec_theard,(*it));
+				pthread_create(&(*it)->thread,nullptr,exec_thread,(*it));
 			}
 		}
 	}
@@ -50,8 +51,8 @@ namespace task_executor{
 	void update_tasks_state(){
 		for(auto it = tasks.begin();it != tasks.end();++it){
 			if((*it)->taskState == TaskState::InProgress){
-				int retcode = 0;
-				if(pthread_tryjoin_np((*it)->theard,&retcode) == 0){
+				void** retcode;
+				if(pthread_tryjoin_np((*it)->thread,retcode) == 0){
 					(*it)->taskState = TaskState::Complite;
 				}
 			}

@@ -10,9 +10,11 @@
 	#define POSTFIX ".so"
 #endif
 
+
+
 namespace plugin_api{
 	
-	const char *pluginsPath = static_cast<char*>("./Plugins/");
+	const char *pluginsPath = static_cast<const char*>("./Plugins/");
 	
 	plugin **g_plugins;
 	
@@ -25,10 +27,14 @@ namespace plugin_api{
 		return false;
 	}
 	
-	PluginError load(char *plugin_name){
+	export PluginError load(char *plugin_name){
 		//Выделяем новый блок памяти под плагин
 		g_plugins = (plugin**)std::realloc(g_plugins,(g_count + 1) * sizeof(plugin*));
 		g_plugins[g_count] = (plugin*)std::calloc(1,sizeof(plugin));
+		
+		g_plugins[g_count]->pluginName = (char*)std::calloc(std::strlen(plugin_name),sizeof(char));
+		g_plugins[g_count]->pluginName =        
+		std::strcpy(g_plugins[g_count]->pluginName,plugin_name);
 		
 		//Формирукм имя динамической библиотеки
 		char *dllname = (char*)std::calloc(std::strlen(pluginsPath)+std::strlen(plugin_name)+POSTFIX_SIZE+1,sizeof(char));
@@ -36,10 +42,21 @@ namespace plugin_api{
 		dllname = std::strcat(dllname,plugin_name);
 		dllname = std::strcat(dllname,POSTFIX);
 		
+		std::cout<<"load from "<< dllname << std::endl;
 		//Загружаем библиотеку плагина
 		#ifdef __linux__
 			void *lib = dlopen(dllname,RTLD_LAZY);
+			char *ermsg = dlerror();
+			if(ermsg != nullptr){
+			  std::cout<<ermsg<<std::endl;
+			  return PluginError::PluginDllError;
+			}
 			export_function plugin_export = (export_function)dlsym(lib,"plugin_export");
+			ermsg = dlerror();
+			if(ermsg != nullptr){
+			  std::cout<<ermsg<<std::endl;
+			  return PluginError::PluginDllError;
+			}
 			g_plugins[g_count]->dllLibrary = lib;
 		#endif
 		
@@ -71,6 +88,9 @@ namespace plugin_api{
 		unsigned short int function_id = 0;
 		bool plugin_not_found = true;
 		bool function_not_found = true;
+		std::cout<<"exec start "<< g_count<<std::endl;
+		std::cout<<plugin_name<<std::endl;
+		std::cout<<(*(g_plugins[0])).pluginName<<std::endl;
 		//Ищем плагин
 		for(unsigned short int i = 0;i < g_count;i++){
 			if(std::strcmp(plugin_name,g_plugins[i]->pluginName) == 0){
@@ -80,7 +100,7 @@ namespace plugin_api{
 		}
 		
 		if(plugin_not_found) return PluginError::PluginNotFound;
-		
+		std::cout<<function_name<<" test1"<<std::endl;
 		//Ищем функцию
 		for(unsigned short int i = 0;i < MAX_FUNCTION_COUNT;i++){
 			if(g_plugins[plugin_id]->pluginFunctions[i].functionInfo.functionType == FunctionType::NotLoad){
@@ -93,7 +113,7 @@ namespace plugin_api{
 				break;
 			}
 		}
-		
+		std::cout<<function_name<<" test2"<<std::endl;
 		if(function_not_found) return PluginError::FunctionNotExists;
 		
 		//Вызов найденной функции

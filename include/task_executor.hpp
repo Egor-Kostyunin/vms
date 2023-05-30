@@ -2,7 +2,7 @@
 #define TASK_EXECUTOR_HPP
 #include "plugin.hpp"
 #ifdef __linux__
-	#include <ptheard.h>
+	#include <pthread.h>
 #endif
 
 namespace task_executor{

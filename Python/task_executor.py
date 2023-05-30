@@ -8,6 +8,6 @@ class pfarg(Union):
 				
 PFARGPTR = POINTER(pfarg)
 
-plugin = CDLL("../plugin.so")
+#plugin = CDLL("~/uva/plugin.so")
 
-task_executor = CDLL("../task_executor.so")
+#task_executor = CDLL("~/uva/task_executor.so")

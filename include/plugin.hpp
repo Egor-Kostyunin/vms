@@ -43,6 +43,7 @@ namespace plugin_api{
 		MissingArg,
 		InvalidArg,
 		PluginNotExists,
+		PluginDllError,
 		PluginNameIsNull,
 		PluginNotFound,
 		FunctionNotExists,
@@ -52,7 +53,7 @@ namespace plugin_api{
 		FunctionCountLimitOverflow,
 		InvalidFunctionCount
 	};
-	
+	extern "C"{
 	/** @brief pfarg - аргумент функции плагина
 	  * @details Общий тип данных для передачи аргументов плагину
 	  */
@@ -105,7 +106,7 @@ namespace plugin_api{
 		unsigned short int functionCount;
 	} plugin;
 	
-	typedef function_info (*export_function)(unsigned short int *count);
+	typedef function_info* (*export_function)(unsigned short int *count);
 	
 	/** @brief is_loaded - проверяет наличие плагина в списке загруженных
 	  * @param plugin_name - имя плагина
@@ -117,6 +118,7 @@ namespace plugin_api{
 	  * @param plugin_name - имя плагина
 	  * @return PluginError(Возможные значения Success,PluginNameIsNull,PluginNotExists,FunctionCountLimitOverflow,InvalidFunctionCount,FunctionNotExists,FunctionNameNotAllow)
 	  */
+	
 	PluginError load(char *plugin_name);
 	
 	/** @brief exec - вызов функции плагина
@@ -133,5 +135,6 @@ namespace plugin_api{
 	pfarg* alloc_ret(unsigned short int count);
 	
 	pfarg* create_arg_tuple(unsigned short int count,...);
+	}
 };
 #endif
