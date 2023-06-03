@@ -1,13 +1,17 @@
 import argparse
 import queue
 import sys
+import json
 import sounddevice as sd
 
 from vosk import Model, KaldiRecognizer
 
 class AuidoSpeecher():
     def __init__(self):
-        self = self
+        self.generatorObj = self.Degenerator()
+        pass
+    def Next(self):
+        return next(self.generatorObj, 'STOP')
     def Degenerator(self):
         q = queue.Queue()
         listCommands = []
@@ -68,10 +72,6 @@ class AuidoSpeecher():
 
             with sd.RawInputStream(samplerate=args.samplerate, blocksize = 8000, device=args.device,
                     dtype="int16", channels=1, callback=callback):
-                print("#" * 80)
-                print("Press Ctrl+C to stop the recording")
-                print("#" * 80)
-
                 rec = KaldiRecognizer(model, args.samplerate)
                 while True:
                     data = q.get()
@@ -80,12 +80,12 @@ class AuidoSpeecher():
                         #res = rec.SrtResult()
                         #print(res)
                         #listCommands.append(rec.Result())
-                        yield rec.Result()
+                        yield json.loads(rec.Result())['text']
                         #print(listCommands)
                     #else:
                     #    print(rec.PartialResult())
-                    if dump_fn is not None:
-                        dump_fn.write(data)
+                    #if dump_fn is not None:
+                        #dump_fn.write(data)
 
         except KeyboardInterrupt:
             print("\nDone")

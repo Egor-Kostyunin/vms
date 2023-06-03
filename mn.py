@@ -14,7 +14,8 @@ profiles = {}
 
 def StartProggram():
 		for command in auidoSpeecherObj.Degenerator():
-			strArray = json.loads(command)['text'].split(' ')
+			strArray = command.split(' ')
+			print(type(command) is str)
 			if fuzz.ratio(strArray[0], KEYWORD) >= 80:
 				if fuzz.ratio(strArray[1], OPENCMD) >= 80:
 					if strArray[2] in profiles:
@@ -27,4 +28,5 @@ def StartProggram():
 					print(json.loads(command)['text'])
 			
 if(__name__ == "__main__"):
-	StartProggram()
+	while True:
+		print(auidoSpeecherObj.Next())

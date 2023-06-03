@@ -11,7 +11,7 @@ namespace treminal{
 		return functions;
 	}
 	plugin_api::PluginError exec_cmd(plugin_api::pfarg *ret,plugin_api::pfarg *arg){
-	        cout<<arg<<" "<<ret<<endl;
+	    cout<<arg<<" "<<ret<<endl;
 		return plugin_api::PluginError::Success;
 	}
 };

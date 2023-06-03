@@ -1,14 +1,27 @@
-#include "plugin.hpp"
+#include "pythonvm.hpp"
 #include <iostream>
 
 using namespace std;
-using namespace plugin_api;
+using namespace python;
 
 int main(){
-	if(load("terminal") == PluginError::Success){
-		cout<<"Ok"<<endl;
+	py_class pyClass;
+	PythonVM pyVM;
+	const std::list<std::string> classes = {"AuidoSpeecher"};
+	cout<<"End "<<pyVM.LoadPyClass("Python.audioSpeecherOOP",classes,&pyClass)<<endl;
+	PyErr_Print();
+	while(true){
+		PyObject *ret = PyObject_CallMethod(pyClass.pyClasses[0],static_cast<const char*>("Next"),nullptr);
+		if(ret == nullptr){
+			PyErr_Print();
+			continue;
+		}
+		PyObject *retStr = PyUnicode_AsEncodedString(ret, "utf-8", "ERROR");
+		char *text = strdup(PyBytes_AS_STRING(retStr));
+		if(text != nullptr) cout<<text<<endl;
+		Py_XDECREF(ret);
+		Py_XDECREF(retStr);
+		delete text;
 	}
-else cuot<<"fail\n";
-	cout<<(int)load("terminal")<<endl;
 	return 0;
 }
