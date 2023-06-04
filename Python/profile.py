@@ -1,15 +1,17 @@
 import xml.etree.ElementTree as ET
+from cmd_tree import CMDTreeNode
 
-class Profile:
+class ProfileParser:
 	def __init__(self,profile):
-		print('./Profiles/'+profile+'.xml')
 		self.name = profile
 		self.root_node = ET.parse('./Profiles/'+profile+'.xml').getroot()
-		self.cmd_list = {}
-		for tag in self.root_node.findall('req/plugin'):
-			value = tag.attrib['name'] 
-			print(value)
-		self.onopenaction = self.root_node.findall('onopenacton')[0].attrib['function']
-		for tag in self.root_node.findall('cmd/command'):
-			self.cmd_list[tag.attrib['name']] = tag.attrib['function'] 
+		self.plugins = self.GetPluginList()
 		pass
+	def GetPluginList(self):
+		for plugin in self.root_node.findall('req/plugin'):
+			yield plugin.attrib('name')
+	def NextPlugin(self):
+		return next(self.plugins,"END PLUGINS")
+	def GetCommadTree(self):
+		for command in self.root_node.findall('cmd/command'):
+			
