@@ -42,4 +42,21 @@ assert ret is None,'Тест поиска команды длинее любой
 ret = root.FindCmd(['Root','Find','Mark'])
 assert ret is None,'Тест поиска не назначенной команды'
 
+#Тест вставки новой ветки в дерево команд 
+root.SetBrunch(['New','Burnch'],'New_Brunch')
+print(root.child.next.nodeName)
+root.SetBrunch(['New','Command'],'New_Command')
+ret = root.FindCmd(['Root','New','Burnch'])
+assert type(ret) is str and ret == 'New_Brunch','Тест вставки новой ветки в дерево команд '
+
+#Тест вставки ветки разветвляющей существующую ветку 
+root.SetBrunch(['New','Command'],'New_Command')
+ret = root.FindCmd(['Root','New','Command'])
+assert type(ret) is str and ret == 'New_Command','Тест вставки ветки разветвляющей существующую ветку'
+
+
+#Тест вставки ветки продлевающей существующую ветку 
+root.SetBrunch(['New','Command','Append'],'New_Command_Append')
+ret = root.FindCmd(['Root','New','Command','Append'])
+assert type(ret) is str and ret == 'New_Command','Тест вставки ветки продлевающей существующую ветку'
 print('Успех')

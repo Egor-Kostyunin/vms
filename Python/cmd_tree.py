@@ -25,6 +25,27 @@ class CMDTreeNode:
 			raise ValueError("Next node argument value is not CMDTreeNode.")
 		self.next = next
 		pass
+	def SetBrunch(self,brunch_str,cmd,level = 0):
+		if level < len(brunch_str):
+			if self.child is None:
+				self.SetChild(CMDTreeNode(brunch_str[level]))
+			current = self.child
+			find_word_flag = False
+			while find_word_flag != True:
+				if current.nodeName == brunch_str[level]:
+					find_word_flag = True
+				elif current.next is CMDTreeNode:
+					current = current.next
+				else:
+					break;
+			if find_word_flag is False:
+				current.SetNext(CMDTreeNode(brunch_str[level]))
+				current = current.next
+			if level == len(brunch_str)-1:
+				current.cmdName = cmd
+				return
+			current.SetBrunch(brunch_str,cmd,level+1)
+		pass
 	def FindCmd(self,str_array,iter_count = 0,ratio = 90):
 		if iter_count < len(str_array):
 			if fuzz.ratio(self.nodeName, str_array[iter_count]) >= ratio:

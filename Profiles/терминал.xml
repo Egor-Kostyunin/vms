@@ -1,5 +1,6 @@
 <prof appname='none' version='1' std='1'>
 	<req>
+		<plugin name='gtk_file_dialog'/>
 		<plugin name='terminal'/>
 	</req>
 	<onopenacton function='start_cmd_server'/>
@@ -9,6 +10,12 @@
 		</command>
 		<command name='покажи все файлы' function='post_cmd'>
 			<arg type='str' value='ls -a'/>
+		</command>
+		<command name='перейди в папку' function='chenge_directory'></command>
+		<command name='создай файл' function='chenge_directory'></command>
+		<command name='создай папку' function='create_directory'></command>
+		<command name='запиши в файл' function='post_cmd'>
+			<arg type='str' value='/input'/>
 		</command>
 	</cmd>
 </prof>

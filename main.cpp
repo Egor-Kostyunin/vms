@@ -4,10 +4,11 @@
 using namespace std;
 using namespace python;
 
+const std::list<std::string> classes = {"AuidoSpeecher"};
+
 int main(){
 	py_class pyClass;
 	PythonVM pyVM;
-	const std::list<std::string> classes = {"AuidoSpeecher"};
 	cout<<"End "<<pyVM.LoadPyClass("Python.audioSpeecherOOP",classes,&pyClass)<<endl;
 	PyErr_Print();
 	while(true){
