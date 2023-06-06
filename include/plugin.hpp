@@ -1,5 +1,8 @@
 #ifndef PLUGIN_HPP
 #define PLUGIN_HPP
+#ifdef WIN64
+	#include <windows.h>
+#endif
 
 #define MAX_FUNCTION_COUNT 512
 
@@ -57,26 +60,10 @@ namespace plugin_api{
 	/** @brief pfarg - аргумент функции плагина
 	  * @details Общий тип данных для передачи аргументов плагину
 	  */
-	typedef union {
-		///Целое число
-		long int intNumber;
-		///Действительное число
-		double realNumber;
-		///Строка
-		char *strText;
-		///Указатель на данные другого типа
-		void * rndData;
+	typedef struct _pfarg {
+		void *argValuePtr;
+		_pfarg *argNext;
 	} pfarg;
-	
-	/** @brief function_info - информация о функции
-	  * @details Используется для экспорта и вызова функции
-	  */
-	typedef struct _function_info{
-		///Имя фуннкции
-		char* functionName;
-		///Тип функции
-		FunctionType functionType;
-	} function_info;
 	
 	///Тип адреса вызываемой функции
 	typedef PluginError (*function_address)(pfarg *ret,pfarg *arg);
@@ -85,8 +72,8 @@ namespace plugin_api{
 	  * @details Хранит данные необходимые для вызова функции
 	  */
 	typedef struct _plugin_function{
-		///Информация о функции
-		function_info functionInfo;
+		///Имя фуннкции
+		char* functionName;
 		///Адрес для вызова функции
 		function_address functionAddress;
 	} plugin_function;
@@ -98,15 +85,21 @@ namespace plugin_api{
 	typedef struct _plugin{
 		///Имя плагина
 		char *pluginName;
-		///Ссылка на динамическую библиотеку плагина
-		void *dllLibrary;
+		#ifdef __linux__
+			///Ссылка на динамическую библиотеку плагина
+			void *dllLibrary;
+		#endif
+		#ifdef WIN64
+			///Ссылка на динамическую библиотеку плагина
+			HMODULE dllLibrary;
+		#endif
 		///Экспортированные из плагина функции
 		plugin_function pluginFunctions[MAX_FUNCTION_COUNT];
 		///Количество экспортированных функций
 		unsigned short int functionCount;
 	} plugin;
 	
-	typedef function_info* (*export_function)(unsigned short int *count);
+	typedef char** (*export_function)(unsigned short int *count);
 	
 	/** @brief is_loaded - проверяет наличие плагина в списке загруженных
 	  * @param plugin_name - имя плагина
@@ -131,10 +124,6 @@ namespace plugin_api{
 	  * @param plugin_name - имя плагина
 	  */
 	void unload(char *plugin_name);
-	
-	pfarg* alloc_ret(unsigned short int count);
-	
-	pfarg* create_arg_tuple(unsigned short int count,...);
 	}
 };
 #endif

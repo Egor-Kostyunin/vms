@@ -1,8 +1,10 @@
 #include "terminal.hpp"
 
-using namespace treminal;
-
 int main(){
-	exec_cmd(nullptr,plugin_api::create_arg_tuple(2,(plugin_api::pfarg)"ls",(plugin_api::pfarg)4096));
+	plugin_api::pfarg narg,args;
+	narg.argValuePtr = new int[1];
+	args.argValuePtr = (char*)"ls";
+	args.argNext = &narg;
+	terminal::exec_cmd(nullptr,&args);
 	return 0;
 }

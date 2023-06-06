@@ -10,6 +10,10 @@
 	#define POSTFIX ".so"
 #endif
 
+#ifdef WIN64
+	#define POSTFIX_SIZE 4
+	#define POSTFIX ".dll"
+#endif
 
 
 namespace plugin_api{
@@ -27,14 +31,13 @@ namespace plugin_api{
 		return false;
 	}
 	
-	export PluginError load(char *plugin_name){
+	PluginError load(char *plugin_name){
 		//Выделяем новый блок памяти под плагин
 		g_plugins = (plugin**)std::realloc(g_plugins,(g_count + 1) * sizeof(plugin*));
 		g_plugins[g_count] = (plugin*)std::calloc(1,sizeof(plugin));
 		
 		g_plugins[g_count]->pluginName = (char*)std::calloc(std::strlen(plugin_name),sizeof(char));
-		g_plugins[g_count]->pluginName =        
-		std::strcpy(g_plugins[g_count]->pluginName,plugin_name);
+		g_plugins[g_count]->pluginName = std::strcpy(g_plugins[g_count]->pluginName,plugin_name);
 		
 		//Формирукм имя динамической библиотеки
 		char *dllname = (char*)std::calloc(std::strlen(pluginsPath)+std::strlen(plugin_name)+POSTFIX_SIZE+1,sizeof(char));
@@ -59,21 +62,27 @@ namespace plugin_api{
 			}
 			g_plugins[g_count]->dllLibrary = lib;
 		#endif
-		
+		#ifdef WIN64
+			HMODULE lib = LoadLibraryA(dllname);
+			export_function plugin_export = (export_function)GetProcAddress(lib,"plugin_export");
+			g_plugins[g_count]->dllLibrary = lib;
+		#endif
 		//Экспортируем функции плагина
 		unsigned short int count = 0;
-		function_info *info = plugin_export(&count);
+		char **info = plugin_export(&count);
 		
 		if(count <= 0) return PluginError::InvalidFunctionCount;
 		
 		//Загружаем функции плагина
 		for(unsigned short int i = 0;i < count;i++){
-			g_plugins[g_count]->pluginFunctions[i].functionInfo.functionName = (char*)std::calloc(strlen(info[i].functionName) + 1,sizeof(char));
-			g_plugins[g_count]->pluginFunctions[i].functionInfo.functionName = std::strcpy(g_plugins[g_count]->pluginFunctions[i].functionInfo.functionName,info[i].functionName);
-			g_plugins[g_count]->pluginFunctions[i].functionInfo.functionType = info[i].functionType;
+			g_plugins[g_count]->pluginFunctions[i].functionName = (char*)std::calloc(strlen(info[i]) + 1,sizeof(char));
+			g_plugins[g_count]->pluginFunctions[i].functionName = std::strcpy(g_plugins[g_count]->pluginFunctions[i].functionName,info[i]);
 			
 			#ifdef __linux__
-				g_plugins[g_count]->pluginFunctions[i].functionAddress = (function_address)dlsym(lib,info[i].functionName);
+				g_plugins[g_count]->pluginFunctions[i].functionAddress = (function_address)dlsym(lib,info[i]);
+			#endif
+			#ifdef WIN64
+				g_plugins[g_count]->pluginFunctions[i].functionAddress = (function_address)GetProcAddress(lib,info[i]);
 			#endif
 		}
 		
@@ -100,75 +109,25 @@ namespace plugin_api{
 		}
 		
 		if(plugin_not_found) return PluginError::PluginNotFound;
-		std::cout<<function_name<<" test1"<<std::endl;
 		//Ищем функцию
 		for(unsigned short int i = 0;i < MAX_FUNCTION_COUNT;i++){
-			if(g_plugins[plugin_id]->pluginFunctions[i].functionInfo.functionType == FunctionType::NotLoad){
-				break;
-			}
-			
-			if(std::strcmp(function_name,g_plugins[plugin_id]->pluginFunctions[i].functionInfo.functionName) == 0){
+			if(std::strcmp(function_name,g_plugins[plugin_id]->pluginFunctions[i].functionName) == 0){
 				function_id = i;
 				function_not_found = false;
 				break;
 			}
 		}
-		std::cout<<function_name<<" test2"<<std::endl;
 		if(function_not_found) return PluginError::FunctionNotExists;
 		
 		//Вызов найденной функции
-		
-		//Функция NotInOut типа
-		if(g_plugins[plugin_id]->pluginFunctions[function_id].functionInfo.functionType == FunctionType::NotInOut){
-			try{
-				return g_plugins[plugin_id]->pluginFunctions[function_id].functionAddress(nullptr,nullptr);
-			}
-			catch(...){
-				std::cout<<function_name<<" crash with exeption"<<std::endl;
-				return PluginError::FunctionCrash; 				
-			}
+		try{
+			return g_plugins[plugin_id]->pluginFunctions[function_id].functionAddress(ret,arg);
+		}
+		catch(...){
+			std::cout<<function_name<<" crash with exeption"<<std::endl;
+			return PluginError::FunctionCrash; 				
 		}
 		
-		//Функция In типа
-		if(g_plugins[plugin_id]->pluginFunctions[function_id].functionInfo.functionType == FunctionType::In){
-			//Проверка наличия аргументов
-			if(arg == nullptr) return PluginError::NullArg;
-			try{
-				return g_plugins[plugin_id]->pluginFunctions[function_id].functionAddress(nullptr,arg);
-			}
-			catch(...){
-				std::cout<<function_name<<" crash with exeption"<<std::endl;
-				return PluginError::FunctionCrash; 				
-			}
-		}
-		
-		//Функция Out типа
-		if(g_plugins[plugin_id]->pluginFunctions[function_id].functionInfo.functionType == FunctionType::Out){
-			//Проверка наличия переменной для возврата результата
-			if(ret == nullptr) return PluginError::NullRet;
-			try{
-				return g_plugins[plugin_id]->pluginFunctions[function_id].functionAddress(ret,nullptr);
-			}
-			catch(...){
-				std::cout<<function_name<<" crash with exeption"<<std::endl;
-				return PluginError::FunctionCrash; 				
-			}
-		}
-		
-		//Функция InOut типа
-		if(g_plugins[plugin_id]->pluginFunctions[function_id].functionInfo.functionType == FunctionType::InOut){
-			//Проверка наличия аргументов
-			if(arg == nullptr) return PluginError::NullArg;
-			//Проверка наличия переменной для возврата результата
-			if(ret == nullptr) return PluginError::NullRet;
-			try{
-				return g_plugins[plugin_id]->pluginFunctions[function_id].functionAddress(ret,arg);
-			}
-			catch(...){
-				std::cout<<function_name<<" crash with exeption"<<std::endl;
-				return PluginError::FunctionCrash; 				
-			}
-		}
 		
 		return PluginError::Success;
 	}
@@ -190,7 +149,7 @@ namespace plugin_api{
 		g_count--;
 		
 		for(unsigned short int i = 0;i < deleted_plugin->functionCount;i++){
-			free(deleted_plugin->pluginFunctions[i].functionInfo.functionName);
+			free(deleted_plugin->pluginFunctions[i].functionName);
 		}
 		
 		#ifdef __linux__
@@ -198,20 +157,5 @@ namespace plugin_api{
 		#endif
 		
 		free(deleted_plugin);
-	}
-	
-	pfarg* alloc_ret(unsigned short int count){
-		return reinterpret_cast<pfarg*>(std::calloc(count,sizeof(pfarg)));
-	}
-	
-	pfarg* create_arg_tuple(unsigned short int count,...){
-		pfarg *arg_ptr = reinterpret_cast<pfarg*>(std::calloc(count,sizeof(pfarg)));
-		va_list arg_list;
-		va_start(arg_list,count);
-		for(unsigned short int i = 0;i < count;i++){
-			arg_ptr[i] = va_arg(arg_list,plugin_api::pfarg);
-		}
-		va_end(arg_list);
-		return arg_ptr;
 	}
 };
