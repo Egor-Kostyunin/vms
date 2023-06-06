@@ -9,7 +9,7 @@ const std::list<std::string> classes = {"AuidoSpeecher"};
 int main(){
 	py_class pyClass;
 	PythonVM pyVM;
-	cout<<"End "<<pyVM.LoadPyClass("Python.audioSpeecherOOP",classes,&pyClass)<<endl;
+	cout<<"End "<<pyVM.LoadPyClass("audioSpeecherOOP",classes,&pyClass)<<endl;
 	PyErr_Print();
 	while(true){
 		PyObject *ret = PyObject_CallMethod(pyClass.pyClasses[0],static_cast<const char*>("Next"),nullptr);
